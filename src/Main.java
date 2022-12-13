@@ -3,82 +3,66 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    static private List<File> files;
-    static private List<File> textFiles;
 
+    private static final String NAME_OF_FOLDER = "1";
 
     public static void main(String[] args) {
-        System.out.println("List of all files in directory 1: ");
-        listOfFiles("1", files);
-        System.out.println();
-        System.out.println("Text files are: ");
-        //filterFiles("1", getFilteredFiles());
-        filteredFiles(files);
-        readFiles(getTextFiles());
+        List<File> listOfAllFiles = new ArrayList<>();
+        saveFilesFromDirectory(NAME_OF_FOLDER, listOfAllFiles);
+        printListOfFiles(listOfAllFiles);
+        printTextFromFiles(createListOfTextFiles(listOfAllFiles));
     }
 
-    static void filteredFiles(List<File> files) {
+    static void saveFilesFromDirectory(String directoryName, List<File> listOfAllFiles) {
+        File directory = new File(directoryName);
+        if (directory.exists()) {
+            parseDirectory(directory.listFiles(), listOfAllFiles);
+        } else {
+            System.out.println("Sorry, wrong name of directory!");
+        }
+    }
+
+    private static void parseDirectory(File[] filesInOneDirectory, List<File> listOfAllFiles) {
+        if (filesInOneDirectory == null) {
+            System.out.println("Folder is empty");
+            return;
+        }
+        for (File file : filesInOneDirectory) {
+            parseFilesOrMoveToNextDir(listOfAllFiles, file);
+        }
+    }
+
+    private static void parseFilesOrMoveToNextDir(List<File> listOfAllFiles, File file) {
+        if (file.isFile()) {
+            listOfAllFiles.add(file);
+        } else {
+            saveFilesFromDirectory(file.getAbsolutePath(), listOfAllFiles);
+        }
+    }
+
+
+    static List<File> createListOfTextFiles(List<File> files) {
         List<File> filteredFiles = new ArrayList<>();
         for (File f : files) {
             if (f.getName().endsWith(".txt")) {
-                System.out.println(f.getName());
                 filteredFiles.add(f);
             }
-            setTextFiles(filteredFiles);
         }
-
+        return filteredFiles;
     }
 
-    static void filterFiles(String directoryName, List<File> filteredFiles) {
-        /*if (fileFromDir.getName().endsWith(".txt")) {
-            getTextFiles() textFiles.add(fileFromDir);
-            setTextFiles(textFiles);
-            *//*
-         *//**//* directory.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File file, String s) {
-                    return s.endsWith(".txt");
-                }
-            });*//**//*
-            List<File> textFiles = List.of(Objects.requireNonNull(directory.listFiles()));
-            setTextFiles(textFiles);*//*
-        }*/
-
-       /* File directory = new File(directoryName);
-        if (directory.exists()) {
-            File[] fList = directory.listFiles();
-            if (fList != null) {
-                for (File file : fList) {
-                    if (file.isFile()) {
-                        if (filteredFiles == null) {
-                            setFilteredFiles(new ArrayList<>());
-                            getFilteredFiles().add(file);
-                        } else {
-                            getFilteredFiles().add(file);
-                        }
-
-                    } else if (file.isDirectory()) {
-                        filterFiles(file.getAbsolutePath(), getFilteredFiles());
-                    }
-                }
-            }
-            assert fList != null;
-            for (File f : fList) {
-                if (f.getName().endsWith(".txt")) {
-                    getTextFiles().add(f);
-                    setTextFiles(textFiles);
-                }
-            }
-        } else {
-            System.out.println("Sorry, wrong name of directory!");
-        }*/
+    private static void printListOfFiles(List<File> listOfAllFiles) {
+        System.out.println("List of all files in directory 1: ");
+        for (File f : listOfAllFiles) {
+            System.out.println(f.getName());
+        }
     }
 
-    static void readFiles(List<File> listToRead) {
+    static void printTextFromFiles(List<File> listToRead) {
+        System.out.println("\nList of all texts in all text files: ");
         String[] texts;
         for (File file : listToRead) {
             System.out.println();
-            System.out.println(file.getName());
             try (Reader reader = new InputStreamReader(new FileInputStream(file))) {
                 char[] array = new char[128];
                 int count = reader.read(array);
@@ -91,54 +75,9 @@ public class Main {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("Text from text files: ");
             for (String a : texts) {
                 System.out.print(a);
             }
         }
-    }
-
-    static void listOfFiles(String directoryName, List<File> files) {
-        File directory = new File(directoryName);
-        if (directory.exists()) {
-            File[] fList = directory.listFiles();
-            if (fList != null) {
-                for (File file : fList) {
-                    if (file.isFile()) {
-                        if (files == null) {
-                            setFiles(new ArrayList<>());
-                            getFiles().add(file);
-                        } else {
-                            getFiles().add(file);
-                        }
-                    } else if (file.isDirectory()) {
-
-                        listOfFiles(file.getAbsolutePath(), getFiles());
-                    }
-                }
-            }
-            assert fList != null;
-            for (File f : fList) {
-                System.out.println(f.getName());
-            }
-        } else {
-            System.out.println("Sorry, wrong name of directory!");
-        }
-    }
-
-    static List<File> getFiles() {
-        return files;
-    }
-
-    static void setFiles(List<File> files) {
-        Main.files = files;
-    }
-
-    static List<File> getTextFiles() {
-        return textFiles;
-    }
-
-    static void setTextFiles(List<File> textFiles) {
-        Main.textFiles = textFiles;
     }
 }
